@@ -15,7 +15,7 @@ names = {
     '16-2082': "Man Pasand Supermarket",
     '16-2083': "Beastcool",
     '16-3417': "Radioactive Puffins",
-    '16-1936': "Team rm -rf /",
+    '16-1936': "rm -rf /",
     '16-1937': "Scacchic",
     '16-1938': "Phishing for Malware"
     } #Team ids with corresponding team names.
