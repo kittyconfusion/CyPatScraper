@@ -1,5 +1,5 @@
-#CyPat Scoreboard Scraper v2.1 Deluxe Extreme Edition Pro Max Plus with Sapphire Monospace
-#Nathan Williams, forcefully retired supreme leader
+#CyPat Scoreboard Scraper v2.1 Deluxe Extreme Edition Pro Max Plus with Sapphire Crystal
+#Nathan Williams, retired supreme leader
 
 from bs4 import BeautifulSoup
 import requests
@@ -20,19 +20,20 @@ names = {
     '16-1938': "Phishing for Malware"
     } #Team ids with corresponding team names.
 
-tier = 'None' #None, Platinum, Gold, Silver, or Middle School
+HasCisco = True   #Set whether the scoreboard has Cisco information
+Tier = 'None'     #None, Platinum, Gold, Silver, or Middle School
+Division = 'Open' #Open, CAP, AJROTC, AFJROTC, or NJROTC
 StateCode = 'TX'
-HasCisco = True
 
-#Index in the table these values occur at
+#Indexes of the scoreboard table where these values occur
 
 TeamIDIndex      =  1
 LocationIndex    =  2
 DivisionIndex    =  3
-PlayTimeIndex    =  5
-TierIndex        = -1
-TeamScoreIndex   =  8 #If Cisco does not exist, uses this for total score
-CiscoScoreIndex  = 10
+TierIndex        =  4
+ScoreTimeIndex   =  7
+TeamScoreIndex   =  9 #If Cisco does not exist, uses this for total score
+CiscoScoreIndex  = 12
 
 
 #Thanks! https://itnext.io/overwrite-previously-printed-lines-4218a9563527
@@ -51,7 +52,7 @@ def formatPrettyBorder(text, sectionWidth):
     out = ''
     half = int((float(sectionWidth) - len(text)) / 2)
     
-    nextChar = '-'
+    nextChar = '⎯'
     for i in range(half):
         out += nextChar
         
@@ -92,13 +93,12 @@ while(True):
 
     for row in data:
         rowdata = row.find_all('td') 
-        if(tier == 'None' or rowdata[TierIndex] == tier):
-            if rowdata[DivisionIndex].text == 'Open': 
+        if(Tier == 'None' or rowdata[TierIndex] == Tier):
+            if rowdata[DivisionIndex].text == Division: 
                 TotalTeams += 1
 
                 if rowdata[LocationIndex].text == StateCode: 
                     StateTeams += 1
-    
     stateCounter = 0 
     totalCounter = 0
     teamsFoundCounter = 0
@@ -106,15 +106,15 @@ while(True):
     for row in data: #Repeats for each row within the pre-sorted data
         rowdata = row.find_all('td') 
         
-        if not(tier == 'None' or rowdata[TierIndex] == tier):
+        if not(Tier == 'None' or rowdata[TierIndex] == Tier):
             continue
 
-        if rowdata[DivisionIndex].text == 'Open': 
+        if rowdata[DivisionIndex].text == Division: 
             totalCounter += 1 
             
             if(rowdata[LocationIndex].text == StateCode): 
                 stateCounter += 1
-                                                
+
         if rowdata[TeamIDIndex].text in names.keys(): #Checks if the team id in a row matches with one of the teams specified above.
             teamsFoundCounter += 1
             Line = ''
@@ -134,7 +134,7 @@ while(True):
 
                 #Total Score if applicable
                 totalScore = round(float(imageScore) + float(ciscoScore), 4)
-                Line += (str(float(imageScore) + float(ciscoScore)) + computeWhitespace(totalScore, 7) + '|')
+                Line += (str(totalScore) + computeWhitespace(totalScore, 7) + '|')
             
             #State Rank
             Line += ' ' + (str(stateCounter) + computeWhitespace(stateCounter, 6) + '|')
@@ -143,7 +143,7 @@ while(True):
             Line += ' ' + (str(totalCounter) + computeWhitespace(totalCounter, 6) + '|')
 
             #Team time. All times given are 5-character.
-            Line += (rowdata[PlayTimeIndex].text + '|') 
+            Line += (rowdata[ScoreTimeIndex].text + '|') 
 
             totalPercentile = str(round(100 / TotalTeams * (TotalTeams - (totalCounter - 1)),2)) + '%'
             Line += ('  ' + totalPercentile + computeWhitespace(totalPercentile, 7) + ' |')
@@ -159,12 +159,13 @@ while(True):
     else:
         print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯ ⎯ ⎯ | ⎯ ⎯ ⎯ | ⎯ ⎯ ⎯ | ⎯ ⎯ ⎯  | ⎯ ⎯ ⎯ ⎯ ⎯| ⎯ ⎯ ⎯ ⎯ ⎯|') 
     
-    #If applicable, only counts teams in tier specified
+    #If applicable, only counts teams in Tier specified
     print('Total Teams:', TotalTeams, '\n' + 'State Teams:', StateTeams)
-    
+    print()
+
     sleep(30)
 
-    #Accounts for the header, footer, and two lines at the end
-    clearLine(teamsFoundCounter + 4)
+    #Accounts for the header, footer, two lines at the end, and an empty line
+    clearLine(teamsFoundCounter + 5)
     
     #print("\n\n")
