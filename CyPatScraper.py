@@ -1,8 +1,9 @@
-#CyPat Scoreboard Scraper v2.1 Deluxe Extreme Edition Pro Max Plus with Sapphire Crystal
+#CyPat Scoreboard Scraper v2.1 Deluxe Extreme Edition Pro Max Ultra Plus 
+#(with Sapphire Crystal XDR Ceramic Shield Hologramic Display with Oleophobic Coating)
 #Nathan Williams, retired supreme leader
 
 from bs4 import BeautifulSoup
-import requests
+from requests import get
 from time import sleep
 
 names = {
@@ -20,20 +21,37 @@ names = {
     '16-1938': "Phishing for Malware"
     } #Team ids with corresponding team names.
 
-HasCisco = True   #Set whether the scoreboard has Cisco information
-Tier = 'None'     #None, Platinum, Gold, Silver, or Middle School
-Division = 'Open' #Open, CAP, AJROTC, AFJROTC, or NJROTC
+Tier      = 'None'     #None, Platinum, Gold, Silver, or Middle School
+Division  = 'Open' #Open, CAP, AJROTC, AFJROTC, or NJROTC
 StateCode = 'TX'
+REPEAT = False
 
-#Indexes of the scoreboard table where these values occur
+def FindIndexInList(li,val):
+    i = 0
+    for j in range(len(li)):
+        if val in li[j]:
+            return i
+        i += 1
+    return 0
 
-TeamIDIndex      =  1
-LocationIndex    =  2
-DivisionIndex    =  3
-TierIndex        =  4
-ScoreTimeIndex   =  7
-TeamScoreIndex   =  9 #If Cisco does not exist, uses this for total score
-CiscoScoreIndex  = 12
+#Determine the indexes of the scoreboard table and their associated values
+r = get('http://scoreboard.uscyberpatriot.org/index.php?sort=Total')
+soup = BeautifulSoup(r.text,'html.parser')
+
+header = soup.find_all('tr')[0]
+rd = header.find_all('th')
+headerList = [i.text for i in rd]
+
+TeamIDIndex     = FindIndexInList(headerList, 'Team')
+LocationIndex   = FindIndexInList(headerList, 'Location')
+DivisionIndex   = FindIndexInList(headerList, 'Division')
+
+TeamScoreIndex  = FindIndexInList(headerList, 'CCS')
+ScoreTimeIndex  = FindIndexInList(headerList, 'Score\xa0Time')
+TierIndex       = FindIndexInList(headerList, 'Tier')
+CiscoScoreIndex = FindIndexInList(headerList, 'Cisco')
+
+HasCisco = True if CiscoScoreIndex else False
 
 
 #Thanks! https://itnext.io/overwrite-previously-printed-lines-4218a9563527
@@ -46,47 +64,34 @@ def clearLine(n=1):
 def computeWhitespace(text, sectionWidth):
     return ' ' * (sectionWidth - len(str(text)))
 
-#Input:  ('Name', 21) 
-#Output: '⎯ ⎯ ⎯ ⎯ Name ⎯ ⎯ ⎯ ⎯ '
 def formatPrettyBorder(text, sectionWidth):
     out = ''
     half = int((float(sectionWidth) - len(text)) / 2)
     
-    nextChar = '⎯'
-    for i in range(half):
-        out += nextChar
-        
-        nextChar = '⎯' if nextChar == ' ' else ' '
-        
-    out += text
-
-    if(len(text) > 0):
-        nextChar = '⎯' if nextChar == ' ' else ' '
+    out += '⎯' * half
 
     if(sectionWidth % 2 == 1):
         half += 1
 
-    for i in range(half):
-        out += nextChar
-        nextChar = '⎯' if nextChar == ' ' else ' '
+    out += text + '⎯' * half
+    
     return out
 
 LongestTeamLen = len(max(list(names.values()), key=len))
 
 print()
 
-#for i in range(1):
 while(True):
-    r = requests.get('http://scoreboard.uscyberpatriot.org/index.php?sort=Total')
+    r = get('http://scoreboard.uscyberpatriot.org/index.php?sort=Total')
     soup = BeautifulSoup(r.text,'html.parser')
 
     data = soup.find_all('tr')[1:] #the 'tr' in html signifies a row.
 
      #The top row of the table
     if(HasCisco):
-        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2) + '|Points| Cisco | Total |' + StateCode + ' Rank| Rank  |  Time  |Percentile|' + StateCode + ' Percent|')
+        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2) + '|Points| Cisco | Total |' + StateCode + ' Rank|⎯Rank⎯⎯|⎯⎯Time⎯⎯|Percentile|' + StateCode + ' Percent|')
     else:
-        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2) + '|Points|' + StateCode + ' Rank| Rank  |  Time  |Percentile|' + StateCode + ' Percent|') 
+        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2) + '|Points|' + StateCode + ' Rank|⎯Rank⎯⎯|⎯⎯Time⎯⎯|Percentile|' + StateCode + ' Percent|') 
 
     StateTeams = 0 
     TotalTeams = 0
@@ -99,8 +104,8 @@ while(True):
 
                 if rowdata[LocationIndex].text == StateCode: 
                     StateTeams += 1
-    stateCounter = 0 
-    totalCounter = 0
+    stateCounter = 1 
+    totalCounter = 1
     teamsFoundCounter = 0
 
     for row in data: #Repeats for each row within the pre-sorted data
@@ -155,13 +160,16 @@ while(True):
 
     #Prints the bottom row of the table.
     if(HasCisco):
-        print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯ ⎯ ⎯ | ⎯ ⎯ ⎯ | ⎯ ⎯ ⎯ | ⎯ ⎯ ⎯ | ⎯ ⎯ ⎯ | ⎯ ⎯ ⎯  | ⎯ ⎯ ⎯ ⎯ ⎯| ⎯ ⎯ ⎯ ⎯ ⎯|') 
+        print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|') 
     else:
-        print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯ ⎯ ⎯ | ⎯ ⎯ ⎯ | ⎯ ⎯ ⎯ | ⎯ ⎯ ⎯  | ⎯ ⎯ ⎯ ⎯ ⎯| ⎯ ⎯ ⎯ ⎯ ⎯|') 
+        print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|') 
     
     #If applicable, only counts teams in Tier specified
     print('Total Teams:', TotalTeams, '\n' + 'State Teams:', StateTeams)
     print()
+
+    if not REPEAT:
+        break
 
     sleep(30)
 
