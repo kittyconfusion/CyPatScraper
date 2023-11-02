@@ -1,4 +1,4 @@
-#CyPat Scoreboard Scraper v2.1 Deluxe Extreme Edition Pro Max Plus with Sapphire Crystal
+#CyPat Scoreboard Scraper v2.1 Deluxe Extreme Edition Pro Max Ultra Plus with Sapphire Crystal Nano Texture Liquid Retina XDR 5K display and Thunderbolt 4 powered by A23 Bionic Pro Max Ultra Plus
 #Nathan Williams, retired supreme leader
 
 from bs4 import BeautifulSoup
@@ -33,7 +33,7 @@ DivisionIndex    =  3
 TierIndex        =  4
 ScoreTimeIndex   =  7
 TeamScoreIndex   =  9 #If Cisco does not exist, uses this for total score
-CiscoScoreIndex  = 12
+CiscoScoreIndex  = 11
 
 
 #Thanks! https://itnext.io/overwrite-previously-printed-lines-4218a9563527
@@ -169,3 +169,5 @@ while(True):
     clearLine(teamsFoundCounter + 5)
     
     #print("\n\n")
+
+    #Thanks for scrolling to the bottom -Colin DiCarlo (if you see this: why was this pull request approved...)
