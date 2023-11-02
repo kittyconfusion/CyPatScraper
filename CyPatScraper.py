@@ -89,9 +89,9 @@ while(True):
 
      #The top row of the table
     if(HasCisco):
-        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2) + '|Points| Cisco | Total |' + StateCode + ' Rank|⎯Rank⎯⎯|⎯⎯Time⎯⎯|Percentile|' + StateCode + ' Percent|')
+        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2) + '|Points| Cisco | Total |' + StateCode + ' Rank|⎯Rank⎯|⎯⎯Time⎯⎯|Percentile|' + StateCode + ' Percent|')
     else:
-        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2) + '|Points|' + StateCode + ' Rank|⎯Rank⎯⎯|⎯⎯Time⎯⎯|Percentile|' + StateCode + ' Percent|') 
+        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2) + '|Points|' + StateCode + ' Rank|⎯Rank⎯|⎯⎯Time⎯⎯|Percentile|' + StateCode + ' Percent|') 
 
     StateTeams = 0 
     TotalTeams = 0
@@ -104,8 +104,8 @@ while(True):
 
                 if rowdata[LocationIndex].text == StateCode: 
                     StateTeams += 1
-    stateCounter = 1 
-    totalCounter = 1
+    stateCounter = 0
+    totalCounter = 0
     teamsFoundCounter = 0
 
     for row in data: #Repeats for each row within the pre-sorted data
@@ -145,7 +145,7 @@ while(True):
             Line += ' ' + (str(stateCounter) + computeWhitespace(stateCounter, 6) + '|')
 
             #Total Rank
-            Line += ' ' + (str(totalCounter) + computeWhitespace(totalCounter, 6) + '|')
+            Line += ' ' + (str(totalCounter) + computeWhitespace(totalCounter, 5) + '|')
 
             #Team time. All times given are 5-character.
             Line += (rowdata[ScoreTimeIndex].text + '|') 
@@ -160,9 +160,9 @@ while(True):
 
     #Prints the bottom row of the table.
     if(HasCisco):
-        print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|') 
+        print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|') 
     else:
-        print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|') 
+        print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|') 
     
     #If applicable, only counts teams in Tier specified
     print('Total Teams:', TotalTeams, '\n' + 'State Teams:', StateTeams)
