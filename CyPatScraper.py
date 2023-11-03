@@ -1,6 +1,7 @@
 #CyPat Scoreboard Scraper v2.1 Deluxe Extreme Edition Pro Max Ultra Plus 
-#(with Sapphire Crystal XDR Ceramic Shield Hologramic Display with Oleophobic Coating)
+#(with Sapphire Crystal Liquid Retina XDR Ceramic Shield Hologramic Display with Oleophobic Coating)
 #Nathan Williams, retired supreme leader
+#With dumb little additions by Colin DiCarlo, aka Smolin
 
 from bs4 import BeautifulSoup
 from requests import get
@@ -24,6 +25,7 @@ names = {
 Tier      = 'None'     #None, Platinum, Gold, Silver, or Middle School
 Division  = 'Open' #Open, CAP, AJROTC, AFJROTC, or NJROTC
 StateCode = 'TX'
+TopTeams = False #Make True to disable Names table, instead showing the top 10 teams on the leaderboard.
 REPEAT = False
 
 def FindIndexInList(li,val):
@@ -52,6 +54,20 @@ TierIndex       = FindIndexInList(headerList, 'Tier')
 CiscoScoreIndex = FindIndexInList(headerList, 'Cisco')
 
 HasCisco = True if CiscoScoreIndex else False
+
+if TopTeams == True :
+    data = soup.find_all('tr')[1:] 
+
+    loops = 0
+    names = {}
+
+    for row in data: 
+        if loops < 10:
+            rowdata = row.find_all('td') 
+
+            subbed = rowdata[1].text
+            names[subbed] = str(loops+1)+" Place"
+            loops = loops+1
 
 
 #Thanks! https://itnext.io/overwrite-previously-printed-lines-4218a9563527
@@ -165,7 +181,7 @@ while(True):
         print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|') 
     
     #If applicable, only counts teams in Tier specified
-    print('Total Teams:', TotalTeams, '\n' + 'State Teams:', StateTeams)
+    print('Total Teams:', TotalTeams, '\n' + StateCode, 'Teams:', StateTeams)
     print()
 
     if not REPEAT:
@@ -177,3 +193,5 @@ while(True):
     clearLine(teamsFoundCounter + 5)
     
     #print("\n\n")
+
+    #Hello from @blortle-dev
