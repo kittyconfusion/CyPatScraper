@@ -80,16 +80,16 @@ def clearLine(n=1):
 def computeWhitespace(text, sectionWidth):
     return ' ' * (sectionWidth - len(str(text)))
 
-def formatPrettyBorder(text, sectionWidth):
+def formatPrettyBorder(text, sectionWidth, char):
     out = ''
     half = int((float(sectionWidth) - len(text)) / 2)
     
-    out += '⎯' * half
+    out += char * half
 
     if(sectionWidth % 2 == 1):
         half += 1
 
-    out += text + '⎯' * half
+    out += text + char * half
     
     return out
 
@@ -105,9 +105,9 @@ while(True):
 
      #The top row of the table
     if(HasCisco):
-        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2) + '|Points| Cisco | Total |' + StateCode + ' Rank|⎯Rank⎯|⎯⎯Time⎯⎯|Percentile|' + StateCode + ' Percent|')
+        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2, '—') + '|Points| Cisco | Total |' + StateCode + ' Rank| Rank |  Time  |Percentile|' + StateCode + ' Percent|')
     else:
-        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2) + '|Points|' + StateCode + ' Rank|⎯Rank⎯|⎯⎯Time⎯⎯|Percentile|' + StateCode + ' Percent|') 
+        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2, '—') + '|Points|' + StateCode + ' Rank| Rank |  Time  |Percentile|' + StateCode + ' Percent|') 
 
     StateTeams = 0 
     TotalTeams = 0
@@ -176,9 +176,9 @@ while(True):
 
     #Prints the bottom row of the table.
     if(HasCisco):
-        print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|') 
-    else:
-        print('|' + formatPrettyBorder('', LongestTeamLen + 2) + '|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯|') 
+        print('|' + formatPrettyBorder('', LongestTeamLen + 2, '—') + '|——————|———————|———————|———————|——————|————————|——————————|——————————|') 
+    else: 
+        print('|' + formatPrettyBorder('', LongestTeamLen + 2, '—') + '|——————|———————|——————|————————|——————————|——————————|') 
     
     #If applicable, only counts teams in Tier specified
     print('Total Teams:', TotalTeams, '\n' + StateCode, 'Teams:', StateTeams)
