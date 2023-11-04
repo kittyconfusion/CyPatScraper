@@ -1,4 +1,4 @@
-#![CyPat Scoreboard Scraper](https://github.com/kittyconfusion/CyPatScraper/assets/144735570/d8e765c5-071a-4554-a18f-57500660853e)
+![CyPat Scoreboard Scraper](https://github.com/kittyconfusion/CyPatScraper/assets/144735570/d8e765c5-071a-4554-a18f-57500660853e)
 Used for displaying team information from the CyberPatriot competition's live [scoreboard](https://scoreboard.uscyberpatriot.org/index.php?sort=Total).
 
 ![Example](https://github.com/kittyconfusion/CyPatScraper/assets/144735570/3da8d18d-86d6-4f06-98f8-04b605337cc2)
