@@ -1,4 +1,4 @@
-#CyPat Scoreboard Scraper v2.1 Deluxe Extreme Edition Pro Max Ultra Plus 
+#CyPat Scoreboard Scraper v2.2 Deluxe Extreme Edition Pro Max Ultra++ 
 #(with Sapphire Crystal Liquid Retina XDR Ceramic Shield Hologramic Display with Oleophobic Coating)
 #Nathan Williams, retired supreme leader
 #With dumb little additions by Colin DiCarlo, aka Smolin
@@ -26,7 +26,7 @@ Tier      = 'None'     #None, Platinum, Gold, Silver, or Middle School
 Division  = 'Open' #Open, CAP, AJROTC, AFJROTC, or NJROTC
 StateCode = 'TX'
 TopTeams = False #Make True to disable Names table, instead showing the top 10 teams on the leaderboard.
-REPEAT = False
+REPEAT = True
 
 def FindIndexInList(li,val):
     i = 0
@@ -114,7 +114,7 @@ while(True):
 
     for row in data:
         rowdata = row.find_all('td') 
-        if(Tier == 'None' or rowdata[TierIndex] == Tier):
+        if(Tier == 'None' or rowdata[TierIndex].text == Tier):
             if rowdata[DivisionIndex].text == Division: 
                 TotalTeams += 1
 
@@ -127,7 +127,7 @@ while(True):
     for row in data: #Repeats for each row within the pre-sorted data
         rowdata = row.find_all('td') 
         
-        if not(Tier == 'None' or rowdata[TierIndex] == Tier):
+        if (Tier != 'None' and rowdata[TierIndex].text != Tier):
             continue
 
         if rowdata[DivisionIndex].text == Division: 
@@ -181,7 +181,8 @@ while(True):
         print('|' + formatPrettyBorder('', LongestTeamLen + 2, '—') + '|——————|———————|——————|————————|——————————|——————————|') 
     
     #If applicable, only counts teams in Tier specified
-    print('Total Teams:', TotalTeams, '\n' + StateCode, 'Teams:', StateTeams)
+    print('Total ' + ('' if Tier == 'None' else Tier + ' ') + 'Teams:', TotalTeams, '\n' 
+          + StateCode, ('' if Tier == 'None' else Tier + ' ') +'Teams:', StateTeams)
     print()
 
     if not REPEAT:
