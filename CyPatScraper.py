@@ -160,6 +160,7 @@ exit(1)
 # - [ ] Re-implement top10
 # - [ ] Re-implement automatic updates
 # - [ ] Delete old code from below this checklist (keeping rn for reference)
+# - [ ] Merge
 
 def FindIndexInList(li, val):
     i = 0
