@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from requests import get
 from time import sleep
 from tabulate import tabulate
+import re
 
 # Team ids with corresponding team names.
 names = {
@@ -27,7 +28,7 @@ names = {
 
 REPEAT = True
 
-column_blacklist = ["ScoredImages", "Location", "Division", "Tier", "**"]
+column_blacklist = ["Rank", "ScoredImages", "Location", "Division", "Tier", "**"]
 
 
 def get_tier():
@@ -170,14 +171,64 @@ def analyze_data(headers, data, tier, division, location):
 
     return headers, data, count_overall, count_tier_div, count_loc
 
+def filter_data(headers, data, tier, division, location):
+    index_location = headers.index("Location")
+    index_tier = headers.index("Tier")
+    index_division = headers.index("Division")
+
+    # Filter out irrelevant rows
+    filtered_data = []
+    for row in data:
+        if location != "" and row[index_location] != location:
+            continue
+        if tier != "" and row[index_tier] != tier:
+            continue
+        if division != "" and row[index_division] != division:
+            continue
+        # Filter out irrelevant columns
+        filtered_row = []
+        for index, item in enumerate(row):
+            if headers[index] in column_blacklist:
+                continue
+            filtered_row.append(item)
+        filtered_data.append(filtered_row)
+
+    filtered_headers = []
+    for header in headers:
+        if header in column_blacklist:
+            continue
+        filtered_headers.append(header)
+
+    return filtered_headers, filtered_data
+
+def final_filter_select(headers, data):
+    index_team = headers.index("TeamNumber")
+    final_data = []
+    for row in data:
+        if re.match("^\d\d-\d\d\d\d$", row[index_team].strip()):
+            continue
+        final_data.append(row)
+    return final_data
+
+def final_filter_top10(headers, data):
+    return data[:10]
+
 
 tier = "Platinum"
 division = "Open"
 location = "TX"
+top10 = False
 table = query_scoreboard()
 headers, data = parse_scoreboard_table(table)
-analyzed_headers, analyzed_data, num_teams, num_teams_tier_div, num_teams_loc = analyze_data(headers, data, tier, division ,location)
-print(tabulate(analyzed_data, headers=analyzed_headers, tablefmt='fancy_grid'))
+analyzed_headers, analyzed_data, num_teams, num_teams_tier_div, num_teams_loc = analyze_data(headers, data, tier, division, location)
+filtered_headers, filtered_data = filter_data(analyzed_headers, analyzed_data, tier, division, location)
+final_data = None
+if top10:
+    final_data = final_filter_top10(filtered_headers, filtered_data)
+else:
+    final_data = final_filter_select(filtered_headers, filtered_data)
+
+print(tabulate(final_data, headers=filtered_headers, tablefmt='fancy_grid'))
 print(f"Total teams: {num_teams}")
 print(f"Total teams in {division} {tier}: {num_teams_tier_div}")
 print(f"Total teams in {location}: {num_teams_loc}")
@@ -185,10 +236,10 @@ exit(1)
 
 # TODO:
 # - [x] Isolate data gathering from percentage calculations
-# - [ ] Fix percentage calculations
-# - [ ] Create filtering system after getting raw data from CyPat
-# - [ ] Create default view and ability to edit default view
-# - [ ] Re-implement top10
+# - [x] Fix percentage calculations
+# - [x] Create filtering system after getting raw data from CyPat
+# - [x] Create default view and ability to edit default view
+# - [x] Re-implement top10
 # - [ ] Re-implement automatic updates
 # - [ ] Delete old code from below this checklist (keeping rn for reference)
 # - [ ] Merge
