@@ -34,9 +34,9 @@ column_blacklist = ["Rank", "ScoredImages", "Location", "Division", "Tier", "**"
 def get_tier():
     print("Enter the desired Tier (a = All, p = Platinum, g = Gold, s = Silver, m = Middle School): ")
     tier = input().lower()
-    if tier == "a" or tier == "all" or tier == "":
+    if tier == "a" or tier == "all":
         return ""
-    if tier == "p" or tier == "platinum" or tier == "plat":
+    if tier == "p" or tier == "platinum" or tier == "plat" or tier == "":
         return "Platinum"
     if tier == "g" or tier == "gold":
         return "Gold"
@@ -49,15 +49,15 @@ def get_tier():
 
 
 def get_division():
-    print("Enter the desired Division (a = All, o = Open, a = AJROTC, n = NJROTC): ")
+    print("Enter the desired Division (a = All, o = Open, aj = AJROTC, nj = NJROTC): ")
     division = input().lower()
-    if division == "a" or division == "all" or division == "":
+    if division == "a" or division == "all":
         return ""
-    if division == "o" or division == "open":
+    if division == "o" or division == "open" or division == "":
         return "Open"
-    if division == "a" or division == "ajrotc":
+    if division == "aj" or division == "ajrotc":
         return "AJROTC"
-    if division == "n" or division == "njrotc":
+    if division == "nj" or division == "njrotc":
         return "NJROTC"
     print("Invalid input. Try again.")
     return get_division()
@@ -74,8 +74,10 @@ def get_location():
     state = input().upper()
     if state in states:
         return state
-    if state == "A" or state == "ALL" or state == "":
+    if state == "A" or state == "ALL":
         return ""
+    if state == "":
+        return "TX"
     else:
         print("Invalid input. Try again.")
         return get_location()
@@ -86,7 +88,7 @@ def get_top10():
     top_teams = input().lower()
     if top_teams == "y" or top_teams == "yes":
         return True
-    if top_teams == "n" or top_teams == "no":
+    if top_teams == "n" or top_teams == "no" or top_teams == "":
         return False
     print("Invalid input. Try again.")
     return get_top10()
@@ -161,22 +163,22 @@ def analyze_data(headers, data, tier, division, location):
     count_tier_div = 0
     count_loc = 0
     for row in data:
-        if row[index_tier] == tier and row[index_division] == division:
+        if (row[index_tier] == tier or tier == "") and (row[index_division] == division or division == ""):
             count_tier_div += 1
-        if row[index_location] == location:
+        if row[index_location] == location or location == "":
             count_loc += 1
 
     # Add analysis to rows
     current_rank_tier_div = 0
     current_rank_loc = 0
     for index, row in enumerate(data):
-        row[index_r_o] = index
-        row[index_p_o] = f"{(index / count_overall)*100:.2f}%"
-        if row[index_tier] == tier and row[index_division] == division:
+        row[index_r_o] = index+1
+        row[index_p_o] = f"{((index+1) / count_overall)*100:.2f}%"
+        if (row[index_tier] == tier or tier == "") and (row[index_division] == division or division == ""):
             current_rank_tier_div += 1
             row[index_r_td] = current_rank_tier_div
             row[index_p_td] = f"{(current_rank_tier_div / count_tier_div) * 100:.2f}%"
-        if row[index_location] == location:
+        if row[index_location] == location or location == "":
             current_rank_loc += 1
             row[index_r_l] = current_rank_loc
             row[index_p_l] = f"{(current_rank_loc / count_loc) * 100:.2f}%"
@@ -241,7 +243,7 @@ def display_scoreboard(tier="Platinum", division="Open", location="TX", top10=Fa
 
     print(tabulate(final_data, headers=filtered_headers, tablefmt='fancy_grid'))
     print(f"Total teams: {num_teams}")
-    print(f"Total teams in {division} {tier}: {num_teams_tier_div}")
+    print(f"Total teams in {f'{division} {tier}'.strip()}: {num_teams_tier_div}")
     print(f"Total teams in {location}: {num_teams_loc}")
 
 # Thanks! https://itnext.io/overwrite-previously-printed-lines-4218a9563527
