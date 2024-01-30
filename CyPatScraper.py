@@ -33,8 +33,8 @@ column_blacklist = ["ScoredImages", "Location", "Division", "Tier", "**"]
 def get_tier():
     print("Enter the desired Tier (a = All, p = Platinum, g = Gold, s = Silver, m = Middle School): \n")
     tier = input().lower()
-    if tier == "a" or tier == "all":
-        return "All"
+    if tier == "a" or tier == "all" or tier == "":
+        return ""
     if tier == "p" or tier == "platinum" or tier == "plat":
         return "Platinum"
     if tier == "g" or tier == "gold":
@@ -50,8 +50,8 @@ def get_tier():
 def get_division():
     print("Enter the desired Division (a = All, o = Open, a = AJROTC, n = NJROTC): \n")
     division = input().lower()
-    if division == "a" or division == "all":
-        return "All"
+    if division == "a" or division == "all" or division == "":
+        return ""
     if division == "o" or division == "open":
         return "Open"
     if division == "a" or division == "ajrotc":
@@ -63,8 +63,21 @@ def get_division():
 
 
 def get_location():
-    print("Enter the desired 2 letter State code (i.e. TX), or anything else for all States: \n")
-    return input().upper()
+    print("Enter the desired 2 letter State code (i.e. TX), or [a]ll for all States: \n")
+    # https://gist.github.com/JeffPaine/3083347/
+    states = ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
+              'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME',
+              'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
+              'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX',
+              'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']
+    state = input().upper()
+    if state in states:
+        return state
+    if state == "A" or state == "ALL" or state == "":
+        return ""
+    else:
+        print("Invalid input. Try again.\n")
+        return get_location()
 
 
 def get_top_teams():
@@ -119,24 +132,43 @@ def parse_scoreboard_table(table):
     return table_headers, data
 
 
-def get_num_teams(data, tier, division, location):
-    count = 0
-    for row in data:
-        # I am so sorry for this monstrosity
-        if (tier in row or tier == "All" or tier == "") and (division in row or division == "All" or division == "") and (location in row or location == "All" or location == ""):
-            count += 1
-    return count
-
-
-def add_percentile_data(headers, data, teams_texas, teams_open):
+def analyze_data(headers, data, tier, division, location):
     # Prep for percentile data
-    headers.append("% TX")
-    headers.append("% Total")
-    for row in data:
-        row.append(f"{(int(row[0])/teams_texas)*100:.2f}%")
-        row.append(f"{(int(row[0])/teams_open)*100:.2f}%")
+    headers.append("% Overall")
+    headers.append(f"% {tier} {division}")
+    headers.append(f"% {location}")
 
-    return headers, data
+    index_location = headers.index("Location")
+    index_tier = headers.index("Tier")
+    index_division = headers.index("Division")
+
+    # Calculate totals for each analysis column
+    count_overall = len(data)
+    count_tier_div = 0
+    count_loc = 0
+    for index, row in enumerate(data):
+        # Append % Overall now since we already know count overall
+        row.append(f"{(index / count_overall)*100:.2f}%")
+        if row[index_tier] == tier and row[index_division] == division:
+            count_tier_div += 1
+        if row[index_location] == location:
+            count_loc += 1
+
+    # Add more analysis
+    current_rank_tier_div = 0
+    current_rank_loc = 0
+    for row in data:
+        if row[index_tier] == tier and row[index_division] == division:
+            current_rank_tier_div += 1
+            row.append(f"{(current_rank_tier_div / count_tier_div) * 100:.2f}%")
+        if row[index_location] == location:
+            current_rank_loc += 1
+            # If they aren't in open plat, append an empty string to push the value into the correct column
+            if row[index_tier] != tier or row[index_division] != division:
+                row.append("")
+            row.append(f"{(current_rank_loc / count_loc) * 100:.2f}%")
+
+    return headers, data, count_overall, count_tier_div, count_loc
 
 
 tier = "Platinum"
@@ -144,16 +176,15 @@ division = "Open"
 location = "TX"
 table = query_scoreboard()
 headers, data = parse_scoreboard_table(table)
-teams_texas = get_num_teams(data, tier, division, "TX")
-teams_all = get_num_teams(data, tier, division, "All")
-headers, data = add_percentile_data(headers, data, teams_texas, teams_all)
-print(tabulate(data, headers=headers, tablefmt='fancy_grid'))
-print(f"Total teams Texas: {teams_texas}")
-print(f"Total teams: {teams_all}")
+analyzed_headers, analyzed_data, num_teams, num_teams_tier_div, num_teams_loc = analyze_data(headers, data, tier, division ,location)
+print(tabulate(analyzed_data, headers=analyzed_headers, tablefmt='fancy_grid'))
+print(f"Total teams: {num_teams}")
+print(f"Total teams in {division} {tier}: {num_teams_tier_div}")
+print(f"Total teams in {location}: {num_teams_loc}")
 exit(1)
 
 # TODO:
-# - [ ] Isolate data gathering from percentage calculations
+# - [x] Isolate data gathering from percentage calculations
 # - [ ] Fix percentage calculations
 # - [ ] Create filtering system after getting raw data from CyPat
 # - [ ] Create default view and ability to edit default view
@@ -161,6 +192,9 @@ exit(1)
 # - [ ] Re-implement automatic updates
 # - [ ] Delete old code from below this checklist (keeping rn for reference)
 # - [ ] Merge
+
+# TODO Bugs:
+# - [x] TX percentages are only inserted for open plat teams
 
 def FindIndexInList(li, val):
     i = 0
