@@ -15,4 +15,4 @@ pip install requests
 pip install tabulate
 ``` 
 
-Configure Team IDs before launching.
+Configure Team IDs and ASK_QUESTIONS before launching.

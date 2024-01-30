@@ -6,7 +6,8 @@
 
 from bs4 import BeautifulSoup
 from requests import get
-from time import sleep
+# If adding back automatic refreshing, uncomment this
+#from time import sleep
 from tabulate import tabulate
 import re
 
@@ -26,7 +27,10 @@ names = {
     '16-1938': "Phishing for Malware"
 }
 
-REPEAT = True
+ASK_QUESTIONS = False
+
+# This would need to get re-implemented
+# REPEAT = True
 
 column_blacklist = ["Rank", "ScoredImages", "Location", "Division", "Tier", "**"]
 
@@ -247,8 +251,10 @@ def display_scoreboard(tier="Platinum", division="Open", location="TX", top10=Fa
     print(f"Total teams in {location}: {num_teams_loc}")
 
 
-# Thanks! https://itnext.io/overwrite-previously-printed-lines-4218a9563527
+# I didn't add automatic refreshing back because I find it kind of annoying, but if someone can
+# figure it out that might be useful.
 def clearLine(n=1):
+    # Thanks! https://itnext.io/overwrite-previously-printed-lines-4218a9563527
     LINE_UP = '\033[1A'
     LINE_CLEAR = '\x1b[2K'
     for i in range(n):
@@ -256,6 +262,8 @@ def clearLine(n=1):
 
 
 if __name__ == '__main__':
-    display_scoreboard(get_tier(), get_division(), get_location(), get_top10())
-    # I didn't add clearLine back because I find it kind of annoying, but if someone can
-    # figure it out that might be useful.
+    if ASK_QUESTIONS:
+        display_scoreboard(get_tier(), get_division(), get_location(), get_top10())
+    else:
+        display_scoreboard("Platinum", "Open", "TX", False)
+
