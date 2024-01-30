@@ -2,7 +2,7 @@
 # (with Sapphire Crystal Liquid Retina XDR Ceramic Shield Hologramic Display with Oleophobic Coating)
 # Nathan Williams, retired supreme leader
 # With dumb little additions by Colin DiCarlo, aka Smolin
-# Reworked by Gideon Witchel
+# Redesigned from scratch by Gideon Witchel
 
 from bs4 import BeautifulSoup
 from requests import get
@@ -32,7 +32,7 @@ column_blacklist = ["Rank", "ScoredImages", "Location", "Division", "Tier", "**"
 
 
 def get_tier():
-    print("Enter the desired Tier (a = All, p = Platinum, g = Gold, s = Silver, m = Middle School): \n")
+    print("Enter the desired Tier (a = All, p = Platinum, g = Gold, s = Silver, m = Middle School): ")
     tier = input().lower()
     if tier == "a" or tier == "all" or tier == "":
         return ""
@@ -44,12 +44,12 @@ def get_tier():
         return "Silver"
     if tier == "m" or tier == "ms" or tier == "middle" or tier == "middle school":
         return "Middle+School"
-    print("Invalid input. Try again.\n")
+    print("Invalid input. Try again.")
     return get_tier()
 
 
 def get_division():
-    print("Enter the desired Division (a = All, o = Open, a = AJROTC, n = NJROTC): \n")
+    print("Enter the desired Division (a = All, o = Open, a = AJROTC, n = NJROTC): ")
     division = input().lower()
     if division == "a" or division == "all" or division == "":
         return ""
@@ -59,12 +59,12 @@ def get_division():
         return "AJROTC"
     if division == "n" or division == "njrotc":
         return "NJROTC"
-    print("Invalid input. Try again.\n")
+    print("Invalid input. Try again.")
     return get_division()
 
 
 def get_location():
-    print("Enter the desired 2 letter State code (i.e. TX), or [a]ll for all States: \n")
+    print("Enter the desired 2 letter State code (i.e. TX), or [a]ll for all States: ")
     # https://gist.github.com/JeffPaine/3083347/
     states = ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
               'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME',
@@ -77,19 +77,19 @@ def get_location():
     if state == "A" or state == "ALL" or state == "":
         return ""
     else:
-        print("Invalid input. Try again.\n")
+        print("Invalid input. Try again.")
         return get_location()
 
 
-def get_top_teams():
-    print("Do you want to display the top 10 teams instead of selected teams? [y]es or [n]o: \n")
+def get_top10():
+    print("Do you want to display the top 10 teams instead of selected teams? [y]es or [n]o: ")
     top_teams = input().lower()
     if top_teams == "y" or top_teams == "yes":
         return True
     if top_teams == "n" or top_teams == "no":
         return False
-    print("Invalid input. Try again.\n")
-    return get_top_teams()
+    print("Invalid input. Try again.")
+    return get_top10()
 
 
 def query_scoreboard():
@@ -160,19 +160,18 @@ def analyze_data(headers, data, tier, division, location):
     count_overall = len(data)
     count_tier_div = 0
     count_loc = 0
-    for index, row in enumerate(data):
-        # Append overall stats now since we already know count overall
-        row[index_r_o] = index
-        row[index_p_o] = f"{(index / count_overall)*100:.2f}%"
+    for row in data:
         if row[index_tier] == tier and row[index_division] == division:
             count_tier_div += 1
         if row[index_location] == location:
             count_loc += 1
 
-    # Add more analysis
+    # Add analysis to rows
     current_rank_tier_div = 0
     current_rank_loc = 0
-    for row in data:
+    for index, row in enumerate(data):
+        row[index_r_o] = index
+        row[index_p_o] = f"{(index / count_overall)*100:.2f}%"
         if row[index_tier] == tier and row[index_division] == division:
             current_rank_tier_div += 1
             row[index_r_td] = current_rank_tier_div
@@ -183,6 +182,7 @@ def analyze_data(headers, data, tier, division, location):
             row[index_p_l] = f"{(current_rank_loc / count_loc) * 100:.2f}%"
 
     return headers, data, count_overall, count_tier_div, count_loc
+
 
 def filter_data(headers, data, tier, division, location):
     index_location = headers.index("Location")
@@ -223,85 +223,26 @@ def final_filter_select(headers, data):
         final_data.append(row)
     return final_data
 
+
 def final_filter_top10(headers, data):
     return data[:10]
 
 
-tier = "Platinum"
-division = "Open"
-location = "TX"
-top10 = False
-table = query_scoreboard()
-headers, data = parse_scoreboard_table(table)
-analyzed_headers, analyzed_data, num_teams, num_teams_tier_div, num_teams_loc = analyze_data(headers, data, tier, division, location)
-filtered_headers, filtered_data = filter_data(analyzed_headers, analyzed_data, tier, division, location)
-final_data = None
-if top10:
-    final_data = final_filter_top10(filtered_headers, filtered_data)
-else:
-    final_data = final_filter_select(filtered_headers, filtered_data)
+def display_scoreboard(tier="Platinum", division="Open", location="TX", top10=False):
+    table = query_scoreboard()
+    headers, data = parse_scoreboard_table(table)
+    analyzed_headers, analyzed_data, num_teams, num_teams_tier_div, num_teams_loc = analyze_data(headers, data, tier, division, location)
+    filtered_headers, filtered_data = filter_data(analyzed_headers, analyzed_data, tier, division, location)
+    final_data = None
+    if top10:
+        final_data = final_filter_top10(filtered_headers, filtered_data)
+    else:
+        final_data = final_filter_select(filtered_headers, filtered_data)
 
-print(tabulate(final_data, headers=filtered_headers, tablefmt='fancy_grid'))
-print(f"Total teams: {num_teams}")
-print(f"Total teams in {division} {tier}: {num_teams_tier_div}")
-print(f"Total teams in {location}: {num_teams_loc}")
-exit(1)
-
-# TODO:
-# - [x] Isolate data gathering from percentage calculations
-# - [x] Fix percentage calculations
-# - [x] Create filtering system after getting raw data from CyPat
-# - [x] Create default view and ability to edit default view
-# - [x] Re-implement top10
-# - [ ] Re-implement automatic updates
-# - [ ] Delete old code from below this checklist (keeping rn for reference)
-# - [ ] Merge
-
-# TODO Bugs:
-# - [x] TX percentages are only inserted for open plat teams
-
-def FindIndexInList(li, val):
-    i = 0
-    for j in range(len(li)):
-        if val in li[j]:
-            return i
-        i += 1
-    return 0
-
-
-# Determine the indexes of the scoreboard table and their associated values
-r = get('http://scoreboard.uscyberpatriot.org/index.php?sort=Total')
-soup = BeautifulSoup(r.text, 'html.parser')
-
-header = soup.find_all('tr')[0]
-rd = header.find_all('th')
-headerList = [i.text for i in rd]
-
-TeamIDIndex = FindIndexInList(headerList, 'Team')
-LocationIndex = FindIndexInList(headerList, 'Location')
-DivisionIndex = FindIndexInList(headerList, 'Division')
-
-TeamScoreIndex = FindIndexInList(headerList, 'CCS')
-ScoreTimeIndex = FindIndexInList(headerList, 'Score\xa0Time')
-TierIndex = FindIndexInList(headerList, 'Tier')
-CiscoScoreIndex = FindIndexInList(headerList, 'Cisco')
-
-HasCisco = True if CiscoScoreIndex else False
-
-if TopTeams == True:
-    data = soup.find_all('tr')[1:]
-
-    loops = 0
-    names = {}
-
-    for row in data:
-        if loops < 10:
-            rowdata = row.find_all('td')
-
-            subbed = rowdata[1].text
-            names[subbed] = str(loops + 1) + " Place"
-            loops = loops + 1
-
+    print(tabulate(final_data, headers=filtered_headers, tablefmt='fancy_grid'))
+    print(f"Total teams: {num_teams}")
+    print(f"Total teams in {division} {tier}: {num_teams_tier_div}")
+    print(f"Total teams in {location}: {num_teams_loc}")
 
 # Thanks! https://itnext.io/overwrite-previously-printed-lines-4218a9563527
 def clearLine(n=1):
@@ -310,126 +251,7 @@ def clearLine(n=1):
     for i in range(n):
         print(LINE_UP, end=LINE_CLEAR)
 
-
-def computeWhitespace(text, sectionWidth):
-    return ' ' * (sectionWidth - len(str(text)))
-
-
-def formatPrettyBorder(text, sectionWidth, char):
-    out = ''
-    half = int((float(sectionWidth) - len(text)) / 2)
-
-    out += char * half
-
-    if (sectionWidth % 2 == 1):
-        half += 1
-
-    out += text + char * half
-
-    return out
-
-
-LongestTeamLen = len(max(list(names.values()), key=len))
-
-print()
-
-while (True):
-    r = get('http://scoreboard.uscyberpatriot.org/index.php?sort=Total')
-    soup = BeautifulSoup(r.text, 'html.parser')
-
-    data = soup.find_all('tr')[1:]  # the 'tr' in html signifies a row.
-
-    # The top row of the table
-    if (HasCisco):
-        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2,
-                                       '—') + '|Points| Cisco | Total |' + StateCode + ' Rank| Rank |  Time  |Percentile|' + StateCode + ' Percent|')
-    else:
-        print('|' + formatPrettyBorder('Name', LongestTeamLen + 2,
-                                       '—') + '|Points|' + StateCode + ' Rank| Rank |  Time  |Percentile|' + StateCode + ' Percent|')
-
-    StateTeams = 0
-    TotalTeams = 0
-
-    for row in data:
-        rowdata = row.find_all('td')
-        if (Tier == 'None' or rowdata[TierIndex].text == Tier):
-            if rowdata[DivisionIndex].text == Division:
-                TotalTeams += 1
-
-                if rowdata[LocationIndex].text == StateCode:
-                    StateTeams += 1
-    stateCounter = 0
-    totalCounter = 0
-    teamsFoundCounter = 0
-
-    for row in data:  # Repeats for each row within the pre-sorted data
-        rowdata = row.find_all('td')
-
-        if (Tier != 'None' and rowdata[TierIndex].text != Tier):
-            continue
-
-        if rowdata[DivisionIndex].text == Division:
-            totalCounter += 1
-
-            if (rowdata[LocationIndex].text == StateCode):
-                stateCounter += 1
-
-        if rowdata[
-            TeamIDIndex].text in names.keys():  # Checks if the team id in a row matches with one of the teams specified above.
-            teamsFoundCounter += 1
-            Line = ''
-
-            # Team Name
-            teamNick = names.get(rowdata[TeamIDIndex].text)
-            Line += ('| ' + teamNick + computeWhitespace(teamNick, LongestTeamLen + 1) + '|')
-
-            # Team Score
-            imageScore = rowdata[TeamScoreIndex].text
-            Line += ' ' + (imageScore + computeWhitespace(imageScore, 5) + '|')
-
-            if (HasCisco):
-                # Cisco Score if applicable
-                ciscoScore = rowdata[CiscoScoreIndex].text
-                Line += (str(ciscoScore) + computeWhitespace(ciscoScore, 7) + '|')
-
-                # Total Score if applicable
-                totalScore = round(float(imageScore) + float(ciscoScore), 4)
-                Line += (str(totalScore) + computeWhitespace(totalScore, 7) + '|')
-
-            # State Rank
-            Line += ' ' + (str(stateCounter) + computeWhitespace(stateCounter, 6) + '|')
-
-            # Total Rank
-            Line += ' ' + (str(totalCounter) + computeWhitespace(totalCounter, 5) + '|')
-
-            # Team time. All times given are 5-character.
-            Line += (rowdata[ScoreTimeIndex].text + '|')
-
-            totalPercentile = str(round(100 / TotalTeams * (TotalTeams - (totalCounter - 1)), 2)) + '%'
-            Line += ('  ' + totalPercentile + computeWhitespace(totalPercentile, 7) + ' |')
-
-            statePercentile = str(round(100 / StateTeams * (StateTeams - (stateCounter - 1)), 2)) + '%'
-            Line += ('  ' + statePercentile + computeWhitespace(statePercentile, 7) + ' |')
-
-            print(Line)
-
-    # Prints the bottom row of the table.
-    if (HasCisco):
-        print('|' + formatPrettyBorder('', LongestTeamLen + 2,
-                                       '—') + '|——————|———————|———————|———————|——————|————————|——————————|——————————|')
-    else:
-        print('|' + formatPrettyBorder('', LongestTeamLen + 2,
-                                       '—') + '|——————|———————|——————|————————|——————————|——————————|')
-
-        # If applicable, only counts teams in Tier specified
-    print('Total ' + ('' if Tier == 'None' else Tier + ' ') + 'Teams:', TotalTeams, '\n'
-          + StateCode, ('' if Tier == 'None' else Tier + ' ') + 'Teams:', StateTeams)
-    print()
-
-    if not REPEAT:
-        break
-
-    sleep(30)
-
-    # Accounts for the header, footer, two lines at the end, and an empty line
-    clearLine(teamsFoundCounter + 5)
+if __name__ == '__main__':
+    display_scoreboard(get_tier(), get_division(), get_location(), get_top10())
+    # I didn't add clearLine back because I find it kind of annoying, but if someone can
+    # figure it out that might be useful.
