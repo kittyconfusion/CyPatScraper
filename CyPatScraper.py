@@ -246,12 +246,14 @@ def display_scoreboard(tier="Platinum", division="Open", location="TX", top10=Fa
     print(f"Total teams in {f'{division} {tier}'.strip()}: {num_teams_tier_div}")
     print(f"Total teams in {location}: {num_teams_loc}")
 
+
 # Thanks! https://itnext.io/overwrite-previously-printed-lines-4218a9563527
 def clearLine(n=1):
     LINE_UP = '\033[1A'
     LINE_CLEAR = '\x1b[2K'
     for i in range(n):
         print(LINE_UP, end=LINE_CLEAR)
+
 
 if __name__ == '__main__':
     display_scoreboard(get_tier(), get_division(), get_location(), get_top10())
