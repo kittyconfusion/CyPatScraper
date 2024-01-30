@@ -134,10 +134,23 @@ def parse_scoreboard_table(table):
 
 
 def analyze_data(headers, data, tier, division, location):
-    # Prep for percentile data
+    # Prep for more data
+    headers.append("Rank Overall")
+    index_r_o = len(headers)-1
     headers.append("% Overall")
+    index_p_o = len(headers)-1
+    headers.append(f"Rank {tier} {division}")
+    index_r_td = len(headers)-1
     headers.append(f"% {tier} {division}")
+    index_p_td = len(headers)-1
+    headers.append(f"Rank {location}")
+    index_r_l = len(headers)-1
     headers.append(f"% {location}")
+    index_p_l = len(headers)-1
+    # Fill with blanks so they can be set later
+    for row in data:
+        for i in range(0, 6):
+            row.append("")
 
     index_location = headers.index("Location")
     index_tier = headers.index("Tier")
@@ -148,8 +161,9 @@ def analyze_data(headers, data, tier, division, location):
     count_tier_div = 0
     count_loc = 0
     for index, row in enumerate(data):
-        # Append % Overall now since we already know count overall
-        row.append(f"{(index / count_overall)*100:.2f}%")
+        # Append overall stats now since we already know count overall
+        row[index_r_o] = index
+        row[index_p_o] = f"{(index / count_overall)*100:.2f}%"
         if row[index_tier] == tier and row[index_division] == division:
             count_tier_div += 1
         if row[index_location] == location:
@@ -161,13 +175,12 @@ def analyze_data(headers, data, tier, division, location):
     for row in data:
         if row[index_tier] == tier and row[index_division] == division:
             current_rank_tier_div += 1
-            row.append(f"{(current_rank_tier_div / count_tier_div) * 100:.2f}%")
+            row[index_r_td] = current_rank_tier_div
+            row[index_p_td] = f"{(current_rank_tier_div / count_tier_div) * 100:.2f}%"
         if row[index_location] == location:
             current_rank_loc += 1
-            # If they aren't in open plat, append an empty string to push the value into the correct column
-            if row[index_tier] != tier or row[index_division] != division:
-                row.append("")
-            row.append(f"{(current_rank_loc / count_loc) * 100:.2f}%")
+            row[index_r_l] = current_rank_loc
+            row[index_p_l] = f"{(current_rank_loc / count_loc) * 100:.2f}%"
 
     return headers, data, count_overall, count_tier_div, count_loc
 
