@@ -141,15 +141,15 @@ def parse_scoreboard_table(table):
 
 def analyze_data(headers, data, tier, division, location):
     # Prep for more data
-    headers.append("Rank Overall")
+    headers.append("# Overall")
     index_r_o = len(headers)-1
     headers.append("% Overall")
     index_p_o = len(headers)-1
-    headers.append(f"Rank {tier} {division}")
+    headers.append(f"# {tier[:4]} {division}")
     index_r_td = len(headers)-1
-    headers.append(f"% {tier} {division}")
+    headers.append(f"% {tier[:4]} {division}")
     index_p_td = len(headers)-1
-    headers.append(f"Rank {location}")
+    headers.append(f"# {location}")
     index_r_l = len(headers)-1
     headers.append(f"% {location}")
     index_p_l = len(headers)-1
